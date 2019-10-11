@@ -69,6 +69,14 @@ class StanfordCoreNLP:
                 'de': 'stanford-german-corenlp-yyyy-MM-dd-models.jar',
                 'es': 'stanford-spanish-corenlp-yyyy-MM-dd-models.jar'
             }
+            server_props = {
+                'en': 'StanfordCoreNLP.properties',
+                'zh': 'StanfordCoreNLP-chinese.properties',
+                'ar': 'StanfordCoreNLP-arabic.properties',
+                'fr': 'StanfordCoreNLP-french.properties',
+                'de': 'StanfordCoreNLP-german.properties',
+                'es': 'StanfordCoreNLP-spanish.properties'
+                    }
             if len(glob.glob(directory + switcher.get(self.lang))) <= 0:
                 raise IOError(jars.get(
                     self.lang) + ' not exists. You should download and place it in the ' + directory + ' first.')
@@ -91,7 +99,9 @@ class StanfordCoreNLP:
             java_class = "edu.stanford.nlp.pipeline.StanfordCoreNLPServer"
             class_path = '"{}*"'.format(directory)
 
-            args = [cmd, java_args, '-cp', class_path, java_class, '-port', str(self.port)]
+            args = [cmd, java_args, '-cp', class_path, java_class, '-serverProperties',
+                    server_props[lang], '-port', str(self.port)]
+            # args = [cmd, java_args, '-cp', class_path, java_class, '-port', str(self.port)]
 
             args = ' '.join(args)
 
@@ -174,7 +184,7 @@ class StanfordCoreNLP:
         return r_dict
 
     def word_tokenize(self, sentence, span=False):
-        r_dict = self._request('ssplit,tokenize', sentence)
+        r_dict = self._request(self.url, 'tokenize, ssplit', sentence)
         tokens = [token['originalText'] for s in r_dict['sentences'] for token in s['tokens']]
 
         # Whether return token span
@@ -184,6 +194,18 @@ class StanfordCoreNLP:
             return tokens, spans
         else:
             return tokens
+
+    def sent_split(self, sentence):
+        r_dict = self._request(self.url, 'tokenize, ssplit', sentence)
+        tokens = [token['originalText'] for s in r_dict['sentences'] for token in s['tokens']]
+        sent_list = []
+        for s in r_dict['sentences']:
+            line = ''
+            for token in s['tokens']:
+                line += token['originalText']
+            sent_list.append(line)
+        return sent_list
+
 
     def pos_tag(self, sentence):
         r_dict = self._request(self.url, 'pos', sentence)
@@ -207,7 +229,7 @@ class StanfordCoreNLP:
 
     def parse(self, sentence):
         r_dict = self._request(self.url, 'pos,parse', sentence)
-        return [s['parse'] for s in r_dict['sentences']][0]
+        return [s['parse'] for s in r_dict['sentences']]
 
     def dependency_parse(self, sentence):
         r_dict = self._request(self.url, 'depparse', sentence)
@@ -234,9 +256,11 @@ class StanfordCoreNLP:
             data = data.encode('utf-8')
 
         properties = {'annotators': annotators, 'outputFormat': 'json'}
-        params = {'properties': str(properties), 'pipelineLanguage': self.lang}
+        # params = {'properties': str(properties), 'pipelineLanguage': self.lang}
+        # params = {'pipelineLanguage': self.lang, 'properties': str(properties)}
+        params = {'properties': str(properties)}
         if 'pattern' in kwargs:
-            params = {"pattern": kwargs['pattern'], 'properties': str(properties), 'pipelineLanguage': self.lang}
+            params = {"pattern": kwargs['pattern'], 'properties': json.dumps(properties), 'pipelineLanguage': self.lang}
 
         logging.info(params)
         r = requests.post(url, params=params, data=data, headers={'Connection': 'close'})
