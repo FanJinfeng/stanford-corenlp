@@ -10,7 +10,7 @@ setup(
     author_email='1216920263@qq.com',
 
     maintainer='Cunliang Kong',
-    maintainer_email='cunliang.kong@outlook.com'
+    maintainer_email='cunliang.kong@outlook.com',
 
     url='https://github.com/styxjedi/stanford-corenlp',
     keywords=['NLP', 'CL', 'natural language processing',
