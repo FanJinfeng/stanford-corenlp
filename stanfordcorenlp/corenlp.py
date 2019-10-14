@@ -37,6 +37,20 @@ class StanfordCoreNLP:
         # Check args
         self._check_args()
 
+        # spaces
+        self.spaces = {
+                "\u0000": "\ue000",
+                "\u0007": "\ue001",
+                "\u0009": "\ue002",
+                "\u000a": "\ue003",
+                "\u000b": "\ue004",
+                "\u000c": "\ue005",
+                "\u000d": "\ue006",
+                "\u0020": "\ue007",
+                "\ua1a1": "\ue008",
+                "\u3000": "\ue009",
+                }
+
         if path_or_host.startswith('http'):
             self.url = path_or_host + ':' + str(port)
             logging.info('Using an existing server {}'.format(self.url))
@@ -183,9 +197,17 @@ class StanfordCoreNLP:
         r_dict = self._request(semgrex_url, "tokenize,ssplit,depparse", sentence, pattern=pattern)
         return r_dict
 
-    def word_tokenize(self, sentence, span=False):
+    def word_tokenize(self, sentence, span=False, retain_spaces=False):
+        if retain_spaces:
+            for k in self.spaces:
+                v = self.spaces[k]
+                sentence = sentence.replace(k, v)
         r_dict = self._request(self.url, 'tokenize, ssplit', sentence)
         tokens = [token['originalText'] for s in r_dict['sentences'] for token in s['tokens']]
+        if retain_spaces:
+            for k in self.spaces:
+                v = self.spaces[k]
+                tokens = [t.replace(v, k) for t in tokens]
 
         # Whether return token span
         if span:
@@ -195,7 +217,11 @@ class StanfordCoreNLP:
         else:
             return tokens
 
-    def sent_split(self, sentence):
+    def sent_split(self, sentence, retain_spaces=False):
+        if retain_spaces:
+            for k in self.spaces:
+                v = self.spaces[k]
+                sentence = sentence.replace(k, v)
         r_dict = self._request(self.url, 'tokenize, ssplit', sentence)
         tokens = [token['originalText'] for s in r_dict['sentences'] for token in s['tokens']]
         sent_list = []
@@ -203,6 +229,10 @@ class StanfordCoreNLP:
             line = ''
             for token in s['tokens']:
                 line += token['originalText']
+            if retain_spaces:
+                for k in self.spaces:
+                    v = self.spaces[k]
+                    line = line.replace(v, k)
             sent_list.append(line)
         return sent_list
 
