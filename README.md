@@ -1,3 +1,16 @@
+## New Features
+This project is forked from [Lynten/stanford-corenlp](https://github.com/Lynten/stanford-corenlp).
+Since the original project was not maintained after version 3.9.1, I made some changes based on the previous code.
+
+- compatible with Stanford CoreNLP v3.9.2
+- modified the `word_tokenize` method
+- add the `sent_split` method for sentence segmentation
+
+If you have any questions during use, feel free to feedback on the issues.
+
+=======================================
+The following is the original README:
+
 ## stanfordcorenlp
 [![PyPI](https://img.shields.io/pypi/v/stanfordcorenlp.svg)]()
 [![GitHub release](https://img.shields.io/github/release/Lynten/stanford-corenlp.svg)]()
