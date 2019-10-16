@@ -8,7 +8,16 @@ Since the original project was not maintained after version 3.9.1, I made some c
 
 If you have any questions during use, feel free to feedback on the issues.
 
+## Installation
+
+```bash
+git clone https://github.com/styxjedi/stanford-corenlp.git
+cd stanford-corenlp
+python setup.py install
+```
+
 =======================================
+
 The following is the original README:
 
 ## stanfordcorenlp
